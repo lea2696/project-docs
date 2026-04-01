@@ -23,3 +23,14 @@
 ## Next Steps
 
 <!-- What should happen next? -->
+
+## Compliance Checklist
+
+- [ ] Only task-relevant docs were read (list below)
+- [ ] Task routing level was appropriate (fast/standard/full)
+- [ ] Review was performed (if standard or full path)
+- [ ] Documentation was updated where behavior changed
+- [ ] Plan state reflects final implementation
+
+**Docs read this session:**
+<!-- List the documentation files that were read during this session. -->

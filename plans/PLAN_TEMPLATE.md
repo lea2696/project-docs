@@ -34,6 +34,16 @@
 
 <!-- How will we know the plan succeeded? -->
 
+## Deviations
+
+<!-- Record any deviations from the original plan during implementation.
+Format:
+- **Date:** YYYY-MM-DD
+- **What changed:** description of the deviation
+- **Why:** reason the deviation was necessary
+- **Approved by:** human / reviewer / pending
+-->
+
 ## Documentation Updates
 
 <!-- Which docs need to be updated when this plan completes? -->
