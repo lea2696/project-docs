@@ -1,0 +1,64 @@
+# {{PROJECT_NAME}}
+
+> Agent-ready project powered by [project-docs](https://github.com/lea2696/project-docs).
+
+## Context Loading
+
+Always read before every task:
+- `{{PROJECT_DOCS_PATH}}/product/VISION.md`
+- `{{PROJECT_DOCS_PATH}}/context/TECH_STACK.md`
+- `{{PROJECT_DOCS_PATH}}/context/CONVENTIONS.md`
+
+Read when relevant to the task:
+- `{{PROJECT_DOCS_PATH}}/product/SCOPE.md` — when scope questions arise
+- `{{PROJECT_DOCS_PATH}}/product/ROADMAP.md` — when prioritizing work
+- `{{PROJECT_DOCS_PATH}}/architecture/SYSTEM_OVERVIEW.md` — when touching architecture
+- `{{PROJECT_DOCS_PATH}}/context/CURRENT_STATE.md` — when starting a session
+- `{{PROJECT_DOCS_PATH}}/context/KNOWN_ISSUES.md` — when debugging
+- `{{PROJECT_DOCS_PATH}}/references/CRITICAL_FLOWS.md` — when modifying user journeys
+- `{{PROJECT_DOCS_PATH}}/references/KEY_FILES.md` — when locating entry points
+- `{{PROJECT_DOCS_PATH}}/references/REPO_MAP.md` — when navigating the codebase
+- Active plans in `{{PROJECT_DOCS_PATH}}/plans/`
+- Active sessions in `{{PROJECT_DOCS_PATH}}/sessions/`
+- Active handoffs in `{{PROJECT_DOCS_PATH}}/handoffs/`
+
+Never load by default (only on explicit request):
+- Completed plans, historical sessions, `{{PROJECT_DOCS_PATH}}/memory/`
+
+## Agent Delegation
+
+Use subagents from `.claude/agents/` for structured work:
+
+| Agent | When to use |
+|-------|-------------|
+| planner | Converting goals into implementation plans |
+| implementer | Making scoped code changes based on a plan |
+| tester | Defining validation strategy for changes |
+| reviewer | Reviewing completed work for correctness |
+| docs-maintainer | Updating documentation after changes |
+| bootstrapper | Initial project documentation setup |
+
+## Task Routing
+
+| Path | Agents | When |
+|------|--------|------|
+| **Fast** | implementer only | Typo fixes, formatting, config with no behavior impact |
+| **Standard** | planner → implementer → tester → reviewer | Features, bug fixes, refactors, behavior changes |
+| **Full** | all + human checkpoints | Architecture, security, auth, billing, migrations, destructive ops |
+
+When in doubt, use the standard path.
+
+## Conflict Resolution
+
+- **Plan deviation**: Document in the plan's Deviations section and pause for human review
+- **Repeated rejection**: If reviewer rejects 2x on same task, escalate to human
+- **Ambiguity**: Pause and request human intervention
+- **Architecture disagreements**: Always escalate to human
+
+## Session Protocol
+
+At the end of every work session:
+1. Create a session note using `{{PROJECT_DOCS_PATH}}/sessions/SESSION_TEMPLATE.md`
+2. Complete the compliance checklist
+3. If work is incomplete, create a handoff using `{{PROJECT_DOCS_PATH}}/handoffs/HANDOFF_TEMPLATE.md`
+4. Commit documentation changes per conventions
