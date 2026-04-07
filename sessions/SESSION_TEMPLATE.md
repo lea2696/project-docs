@@ -1,8 +1,17 @@
+---
+status: draft
+owner: docs-maintainer
+last_updated: YYYY-MM-DD
+read_policy: never-default
+---
+
 # Session: [Title]
 
 **Session ID:** SESSION-NNN
 **Date:** YYYY-MM-DD
 **Agent:** [Which agent or person]
+**Plan Reference:** <!-- Link to active plan, e.g., plans/PLAN-001.md -->
+**Duration:** <!-- Approximate session duration -->
 
 ## Objective
 
@@ -11,6 +20,20 @@
 ## Work Performed
 
 <!-- What was actually done? -->
+
+## Files Modified
+
+<!-- List files changed during this session. Example:
+- `src/routes/auth.ts` — added login endpoint
+- `tests/auth.test.ts` — added login integration test
+-->
+
+## Tests Run
+
+<!-- Summary of test execution. Example:
+- Unit tests: 42 passed, 0 failed
+- Integration tests: 12 passed, 1 skipped
+-->
 
 ## Decisions Made
 

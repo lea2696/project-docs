@@ -1,3 +1,10 @@
+---
+status: active
+owner: docs-maintainer
+last_updated: YYYY-MM-DD
+read_policy: never-default
+---
+
 # Recurring Mistakes
 
 > Patterns that have caused problems more than once. Use this to prevent repeat failures.

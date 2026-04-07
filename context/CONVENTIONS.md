@@ -1,18 +1,41 @@
+---
+status: active
+owner: human
+last_updated: YYYY-MM-DD
+read_policy: always
+---
+
 # Conventions
 
 > Project-wide coding and workflow conventions.
 
 ## Code Style
 
-<!-- TODO: Specify linter, formatter, and style guide. -->
+<!-- Specify linter, formatter, and style guide. Example:
+- **Linter**: ESLint with @typescript-eslint
+- **Formatter**: Prettier (printWidth: 100, singleQuote: true, trailingComma: all)
+- **Style guide**: Airbnb base
+-->
 
 ## Naming Conventions
 
-<!-- TODO: Define naming patterns for files, variables, functions, classes, and modules. -->
+<!-- Define naming patterns. Example:
+- **Files**: kebab-case (e.g., `user-service.ts`)
+- **Variables/functions**: camelCase
+- **Classes/types**: PascalCase
+- **Constants**: UPPER_SNAKE_CASE
+- **Database tables**: snake_case plural (e.g., `user_sessions`)
+-->
 
 ## File Organization
 
-<!-- TODO: Describe the expected directory structure for application code. -->
+<!-- Describe the expected directory structure for application code. Example:
+- `src/routes/` — HTTP route handlers
+- `src/services/` — Business logic
+- `src/models/` — Database models and types
+- `src/middleware/` — Express middleware
+- `src/utils/` — Shared utilities
+-->
 
 ## Git Conventions
 
@@ -22,7 +45,12 @@
 
 ## Testing Conventions
 
-<!-- TODO: Define where tests live, naming patterns, and minimum coverage expectations. -->
+<!-- Define where tests live, naming patterns, and coverage expectations. Example:
+- Tests live in `tests/` mirroring `src/` structure
+- Test files named `*.test.ts`
+- Minimum coverage: 80% for business logic modules
+- Integration tests use test database (not mocks)
+-->
 
 ## Documentation Conventions
 

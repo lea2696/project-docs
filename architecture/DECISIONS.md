@@ -1,29 +1,37 @@
+---
+status: draft
+owner: human
+last_updated: YYYY-MM-DD
+read_policy: never-default
+---
+
 # Architecture Decision Records
 
-> Record of significant architectural decisions using ADR format.
+> Record of significant architectural decisions. Each ADR is stored as an individual file in `architecture/decisions/`.
 
-## Template
+## Decision Index
+
+| ID | Title | Status | Date |
+|----|-------|--------|------|
+| [ADR-001](decisions/ADR-001-two-layer-scaffold.md) | Two-Layer Scaffold Architecture | Accepted | 2026-04-06 |
+| [ADR-002](decisions/ADR-002-opencode-removal.md) | OpenCode Support Removal | Accepted | 2026-04-06 |
+
+## ADR Template (Quick Reference)
+
+For new decisions, create `architecture/decisions/ADR-NNN-short-title.md` using the template at `architecture/decisions/ADR-TEMPLATE.md`.
 
 ```
 ### ADR-NNN: Title
 
 **Status:** Proposed | Accepted | Deprecated | Superseded
+**Date:** YYYY-MM-DD
+**Participants:** Who was involved in this decision
 
-**Context:** What is the issue that we're seeing that is motivating this decision?
+**Context:** What is the issue motivating this decision?
 
-**Decision:** What is the change that we're proposing and/or doing?
+**Decision:** What change are we making?
 
-**Consequences:** What becomes easier or more difficult because of this change?
+**Consequences:** What becomes easier or more difficult?
+
+**Related ADRs:** Links to related decisions
 ```
-
-<!-- TODO: Add decisions as they are made. Example: -->
-
-### ADR-001: [Decision Title]
-
-**Status:** Proposed
-
-**Context:**
-
-**Decision:**
-
-**Consequences:**

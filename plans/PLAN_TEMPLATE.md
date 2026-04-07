@@ -1,8 +1,18 @@
+---
+status: draft
+owner: planner
+last_updated: YYYY-MM-DD
+read_policy: never-default
+---
+
 # Plan: [Title]
 
 **Plan ID:** PLAN-NNN
 **Date:** YYYY-MM-DD
 **Status:** Draft | Active | Completed | Abandoned
+**Owner:** [Who owns execution of this plan]
+**Estimated Effort:** S | M | L | XL
+**Related Plans:** <!-- Link to related plans, e.g., PLAN-001 -->
 
 ## Objective
 
@@ -19,6 +29,14 @@
 ## Risks
 
 <!-- What could go wrong? -->
+
+## Affected Modules
+
+<!-- Which modules, services, or system areas does this plan touch? -->
+
+## Dependencies
+
+<!-- What must be completed or available before this plan can execute? -->
 
 ## Ordered Steps
 
