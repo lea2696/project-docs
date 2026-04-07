@@ -1,6 +1,6 @@
 # Project Docs — Agent-Ready Documentation System
 
-A satellite documentation system designed to live inside any software project. It provides structured project knowledge that AI coding agents (Claude Code, Codex, OpenCode) consume to stay focused, coordinated, and aligned with your project's reality.
+A satellite documentation system designed to live inside any software project. It provides structured project knowledge that AI coding agents (Claude Code, Codex) consume to stay focused, coordinated, and aligned with your project's reality.
 
 **Install it into any repo. Agents read it. Humans maintain it. Everyone stays on the same page.**
 
@@ -41,7 +41,7 @@ It provides:
 - **Context loading policy** — 3 files are always-read, the rest are on-demand. Agents don't waste tokens loading irrelevant docs.
 - **Task routing** — fast path for trivial changes, standard path for features, full path for architecture and security changes.
 - **Conflict resolution** — escalation rules when agents disagree, with human intervention as the final arbiter.
-- **Framework portability** — works with Claude Code (`.claude/agents/`), Codex (`.agents/skills/`), and OpenCode (`.opencode/agents/`).
+- **Framework portability** — works with Claude Code (`.claude/agents/`) and Codex (`.agents/skills/`). For other AI coding tools (e.g., OpenCode), follow the Codex convention (`AGENTS.md` + `.agents/skills/`).
 
 ---
 
@@ -57,7 +57,18 @@ git clone https://github.com/lea2696/project-docs.git project-docs/
 git submodule add https://github.com/lea2696/project-docs.git project-docs/
 ```
 
-After installing, run the bootstrapper agent to fill in the core files interactively:
+After installing, run the bootstrap script to set up agent configuration:
+
+```sh
+# Run the bootstrap CLI (generates CLAUDE.md, AGENTS.md, and agent configs)
+node project-docs/scripts/bootstrap.mjs
+
+# Or with options
+node project-docs/scripts/bootstrap.mjs --dry-run         # Preview changes
+node project-docs/scripts/bootstrap.mjs --non-interactive  # Use defaults
+```
+
+Then run the bootstrapper agent to fill in documentation interactively:
 
 ```
 # Claude Code
@@ -65,10 +76,25 @@ After installing, run the bootstrapper agent to fill in the core files interacti
 
 # Codex
 "Use the bootstrap skill to initialize project docs"
-
-# OpenCode
-"Use the bootstrapper agent to initialize project docs"
 ```
+
+---
+
+## Installation Layout
+
+When installed in a host repo, the system uses a **two-layer layout**:
+
+| Location | Purpose | Consumed by |
+|----------|---------|-------------|
+| `project-docs/` | Documentation content: product vision, architecture, context, references, plans, sessions, handoffs, memory | All agents reading project knowledge |
+| `scaffold/` (inside this repo) | Templates for agent configuration files — bootstrap copies them to host repo root | Bootstrap script only |
+| Host repo root: `CLAUDE.md` | Claude Code master instructions (generated from scaffold) | Claude Code |
+| Host repo root: `AGENTS.md` | Agent routing policy (generated from scaffold) | Codex |
+| Host repo root: `.claude/agents/` | Claude Code subagent definitions (generated from scaffold) | Claude Code |
+| Host repo root: `.claude/rules/` | Claude Code rule sets (generated from scaffold) | Claude Code |
+| Host repo root: `.agents/skills/` | Codex skill definitions (generated from scaffold) | Codex |
+
+The bootstrap script (`scripts/bootstrap.mjs`) handles copying scaffold templates to the host repo root and replacing placeholders with project-specific values.
 
 ---
 
@@ -84,11 +110,12 @@ project-docs/
 ├── architecture/
 │   ├── SYSTEM_OVERVIEW.md     # High-level system architecture and data flow
 │   ├── MODULES.md             # Module inventory and relationships
-│   ├── DECISIONS.md           # Architecture Decision Records (ADR format)
-│   └── DEPENDENCIES.md        # External dependencies with risk profiles
+│   ├── DECISIONS.md           # Architecture Decision Records index
+│   ├── DEPENDENCIES.md        # External dependencies with risk profiles
+│   └── decisions/             # Individual ADR files (ADR-NNN-title.md)
 │
 ├── context/
-│   ├── TECH_STACK.md          # Technology choices, versions, and rationale
+│   ├── TECH_STACK.md          # Technology choices, versions, commands, and rationale
 │   ├── CONVENTIONS.md         # Code style, naming, git, testing, doc conventions
 │   ├── CURRENT_STATE.md       # What's working, in progress, and blocked
 │   └── KNOWN_ISSUES.md        # Tracked bugs and fragile areas
@@ -102,9 +129,21 @@ project-docs/
 ├── sessions/                  # Work session logs (from SESSION_TEMPLATE.md)
 ├── handoffs/                  # Agent-to-agent transfers (from HANDOFF_TEMPLATE.md)
 │
-└── memory/
-    ├── RECURRING_MISTAKES.md  # Structured error patterns with root cause analysis
-    └── CHANGELOG_NOTES.md     # Significant changes with agent impact tracking
+├── memory/
+│   ├── RECURRING_MISTAKES.md  # Structured error patterns with root cause analysis
+│   └── CHANGELOG_NOTES.md     # Significant changes with agent impact tracking
+│
+├── scaffold/                  # Templates for agent config (copied by bootstrap)
+│   ├── CLAUDE.md.template     # Claude Code master instructions template
+│   ├── AGENTS.md.template     # Codex routing policy template
+│   ├── .claude/agents/        # Claude Code subagent templates (6 files)
+│   ├── .claude/rules/         # Claude Code rule templates (4 files)
+│   └── .agents/skills/        # Codex skill templates (6 directories)
+│
+└── scripts/
+    ├── bootstrap.mjs          # Bootstrap CLI (copies scaffold to host repo)
+    ├── bootstrap.sh           # Bash wrapper for bootstrap.mjs
+    └── validate-docs.mjs      # Documentation structure validator
 ```
 
 ---
@@ -123,7 +162,7 @@ Agents follow a **minimum-context-by-default** policy:
 
 ## Agent Roles
 
-All frameworks define the same 6 roles with identical responsibilities and output formats.
+Both frameworks define the same 6 roles with identical responsibilities and output formats.
 
 ### Planner
 
@@ -152,7 +191,6 @@ All frameworks define the same 6 roles with identical responsibilities and outpu
 **Invocation**:
 - Claude Code: delegated via CLAUDE.md or `"use the planner agent"`
 - Codex: `use the planning skill`
-- OpenCode: `use the planner agent`
 
 ---
 
@@ -178,7 +216,6 @@ All frameworks define the same 6 roles with identical responsibilities and outpu
 **Invocation**:
 - Claude Code: delegated via CLAUDE.md or `"use the implementer agent"`
 - Codex: `use the implementation skill`
-- OpenCode: `use the implementer agent`
 
 ---
 
@@ -205,7 +242,6 @@ All frameworks define the same 6 roles with identical responsibilities and outpu
 **Invocation**:
 - Claude Code: delegated via CLAUDE.md or `"use the tester agent"`
 - Codex: `use the testing skill`
-- OpenCode: `use the tester agent`
 
 ---
 
@@ -230,7 +266,6 @@ All frameworks define the same 6 roles with identical responsibilities and outpu
 **Invocation**:
 - Claude Code: delegated via CLAUDE.md or `"use the reviewer agent"`
 - Codex: `use the review skill`
-- OpenCode: `use the reviewer agent`
 
 ---
 
@@ -260,7 +295,6 @@ All frameworks define the same 6 roles with identical responsibilities and outpu
 **Invocation**:
 - Claude Code: delegated via CLAUDE.md or `"use the docs-maintainer agent"`
 - Codex: `use the documentation skill`
-- OpenCode: `use the docs-maintainer agent`
 
 ---
 
@@ -284,7 +318,6 @@ All frameworks define the same 6 roles with identical responsibilities and outpu
 **Invocation**:
 - Claude Code: `"use the bootstrapper agent to initialize project docs"`
 - Codex: `use the bootstrap skill`
-- OpenCode: `"use the bootstrapper agent"`
 
 ---
 
@@ -322,7 +355,7 @@ Claude Code uses a separate rules directory (`.claude/rules/`) with 4 rule sets:
 | **Review** | `.claude/rules/review.md` | Review criteria, rejection conditions, approval requirements |
 | **Documentation** | `.claude/rules/documentation.md` | When/how to update docs, commit policy, end-of-session protocol |
 
-Codex and OpenCode embed equivalent rules in their `AGENTS.md` and skill/agent definitions.
+Codex embeds equivalent rules in its `AGENTS.md` and skill definitions.
 
 ---
 
@@ -379,7 +412,7 @@ MIT
 
 # Project Docs — Sistema de Documentacion para Agentes
 
-Un sistema de documentacion satelite disenado para vivir dentro de cualquier proyecto de software. Provee conocimiento estructurado del proyecto que los agentes de IA (Claude Code, Codex, OpenCode) consumen para mantenerse enfocados, coordinados y alineados con la realidad del proyecto.
+Un sistema de documentacion satelite disenado para vivir dentro de cualquier proyecto de software. Provee conocimiento estructurado del proyecto que los agentes de IA (Claude Code, Codex) consumen para mantenerse enfocados, coordinados y alineados con la realidad del proyecto.
 
 **Instalalo en cualquier repo. Los agentes lo leen. Los humanos lo mantienen. Todos en la misma pagina.**
 
@@ -396,7 +429,7 @@ Provee:
 - **Politica de carga de contexto** — 3 archivos son always-read, el resto es on-demand. Los agentes no desperdician tokens cargando docs irrelevantes.
 - **Enrutamiento de tareas** — fast path para cambios triviales, standard path para features, full path para cambios de arquitectura y seguridad.
 - **Resolucion de conflictos** — reglas de escalacion cuando los agentes no coinciden, con intervencion humana como arbitro final.
-- **Portabilidad de framework** — funciona con Claude Code (`.claude/agents/`), Codex (`.agents/skills/`) y OpenCode (`.opencode/agents/`).
+- **Portabilidad de framework** — funciona con Claude Code (`.claude/agents/`) y Codex (`.agents/skills/`). Para otros tools de IA (ej. OpenCode), seguir la convencion de Codex (`AGENTS.md` + `.agents/skills/`).
 
 ---
 
@@ -412,7 +445,18 @@ git clone https://github.com/lea2696/project-docs.git project-docs/
 git submodule add https://github.com/lea2696/project-docs.git project-docs/
 ```
 
-Despues de instalar, ejecuta el agente bootstrapper para llenar los archivos core interactivamente:
+Despues de instalar, ejecuta el script de bootstrap para configurar los agentes:
+
+```sh
+# Ejecuta el bootstrap CLI (genera CLAUDE.md, AGENTS.md y configs de agentes)
+node project-docs/scripts/bootstrap.mjs
+
+# O con opciones
+node project-docs/scripts/bootstrap.mjs --dry-run         # Vista previa
+node project-docs/scripts/bootstrap.mjs --non-interactive  # Usar defaults
+```
+
+Luego ejecuta el agente bootstrapper para llenar la documentacion interactivamente:
 
 ```
 # Claude Code
@@ -420,10 +464,25 @@ Despues de instalar, ejecuta el agente bootstrapper para llenar los archivos cor
 
 # Codex
 "Usa el skill de bootstrap para inicializar los docs del proyecto"
-
-# OpenCode
-"Usa el agente bootstrapper para inicializar los docs del proyecto"
 ```
+
+---
+
+## Layout de Instalacion
+
+Cuando se instala en un repo anfitrion, el sistema usa un **layout de dos capas**:
+
+| Ubicacion | Proposito | Consumido por |
+|-----------|-----------|---------------|
+| `project-docs/` | Contenido de documentacion: vision, arquitectura, contexto, referencias, planes, sesiones, handoffs, memoria | Todos los agentes |
+| `scaffold/` (en este repo) | Templates de configuracion de agentes — bootstrap los copia al root del host | Solo el script de bootstrap |
+| Root del host: `CLAUDE.md` | Instrucciones master de Claude Code (generado desde scaffold) | Claude Code |
+| Root del host: `AGENTS.md` | Politica de enrutamiento de agentes (generado desde scaffold) | Codex |
+| Root del host: `.claude/agents/` | Definiciones de subagentes Claude Code (generado desde scaffold) | Claude Code |
+| Root del host: `.claude/rules/` | Reglas de Claude Code (generado desde scaffold) | Claude Code |
+| Root del host: `.agents/skills/` | Definiciones de skills Codex (generado desde scaffold) | Codex |
+
+El script de bootstrap (`scripts/bootstrap.mjs`) se encarga de copiar los templates del scaffold al root del repo anfitrion y reemplazar placeholders con valores del proyecto.
 
 ---
 
@@ -439,11 +498,12 @@ project-docs/
 ├── architecture/
 │   ├── SYSTEM_OVERVIEW.md     # Arquitectura de alto nivel y flujo de datos
 │   ├── MODULES.md             # Inventario de modulos y relaciones
-│   ├── DECISIONS.md           # Architecture Decision Records (formato ADR)
-│   └── DEPENDENCIES.md        # Dependencias externas con perfiles de riesgo
+│   ├── DECISIONS.md           # Indice de Architecture Decision Records
+│   ├── DEPENDENCIES.md        # Dependencias externas con perfiles de riesgo
+│   └── decisions/             # Archivos ADR individuales (ADR-NNN-titulo.md)
 │
 ├── context/
-│   ├── TECH_STACK.md          # Tecnologias elegidas, versiones y justificacion
+│   ├── TECH_STACK.md          # Tecnologias, versiones, comandos y justificacion
 │   ├── CONVENTIONS.md         # Estilo de codigo, naming, git, testing, docs
 │   ├── CURRENT_STATE.md       # Que funciona, en progreso, bloqueado
 │   └── KNOWN_ISSUES.md        # Bugs trackeados y areas fragiles
@@ -457,9 +517,21 @@ project-docs/
 ├── sessions/                  # Logs de sesion (desde SESSION_TEMPLATE.md)
 ├── handoffs/                  # Transferencias entre agentes (desde HANDOFF_TEMPLATE.md)
 │
-└── memory/
-    ├── RECURRING_MISTAKES.md  # Patrones de error con analisis de causa raiz
-    └── CHANGELOG_NOTES.md     # Cambios significativos con tracking de impacto en agentes
+├── memory/
+│   ├── RECURRING_MISTAKES.md  # Patrones de error con analisis de causa raiz
+│   └── CHANGELOG_NOTES.md     # Cambios significativos con tracking de impacto
+│
+├── scaffold/                  # Templates de config de agentes (copiados por bootstrap)
+│   ├── CLAUDE.md.template     # Template de instrucciones master Claude Code
+│   ├── AGENTS.md.template     # Template de politica de enrutamiento Codex
+│   ├── .claude/agents/        # Templates de subagentes Claude Code (6 archivos)
+│   ├── .claude/rules/         # Templates de reglas Claude Code (4 archivos)
+│   └── .agents/skills/        # Templates de skills Codex (6 directorios)
+│
+└── scripts/
+    ├── bootstrap.mjs          # Bootstrap CLI (copia scaffold al repo host)
+    ├── bootstrap.sh           # Wrapper bash para bootstrap.mjs
+    └── validate-docs.mjs      # Validador de estructura de documentacion
 ```
 
 ---
@@ -478,40 +550,40 @@ Los agentes siguen una politica de **contexto minimo por defecto**:
 
 ## Roles de Agentes
 
-Los 6 roles son identicos en los tres frameworks.
+Los 6 roles son identicos en ambos frameworks.
 
 ### Planner
 **Proposito**: Convierte objetivos en planes de implementacion ejecutables.
 **Salida**: Objetivo, Scope, Riesgos, Tareas Ordenadas, Checkpoints Humanos, Estrategia de Validacion, Criterios de Completitud.
-**Invocacion**: Claude Code: `"usa el agente planner"` | Codex: `usa el skill de planning` | OpenCode: `"usa el agente planner"`
+**Invocacion**: Claude Code: `"usa el agente planner"` | Codex: `usa el skill de planning`
 
 ### Implementer
 **Proposito**: Realiza cambios de codigo acotados segun el plan activo.
 **Salida**: Archivos cambiados, Comportamiento cambiado, Validacion ejecutada, Riesgos restantes, Documentacion tocada.
-**Invocacion**: Claude Code: `"usa el agente implementer"` | Codex: `usa el skill de implementation` | OpenCode: `"usa el agente implementer"`
+**Invocacion**: Claude Code: `"usa el agente implementer"` | Codex: `usa el skill de implementation`
 
 ### Tester
 **Proposito**: Define la estrategia de validacion minima suficiente.
 **Niveles**: Sin tests (trivial) → Unit (logica pura) → Integration (limites de modulos) → E2E (journeys criticos).
 **Salida**: Nivel de Riesgo, Superficie Afectada, Validacion Recomendada, Tests a Reusar, Checks Manuales.
-**Invocacion**: Claude Code: `"usa el agente tester"` | Codex: `usa el skill de testing` | OpenCode: `"usa el agente tester"`
+**Invocacion**: Claude Code: `"usa el agente tester"` | Codex: `usa el skill de testing`
 
 ### Reviewer
 **Proposito**: Revisa por correctitud, fit arquitectonico, riesgo de regresion e impacto en docs.
 **Rechaza si**: cambia comportamiento sin validacion, introduce refactors no relacionados, viola arquitectura sin decision record.
 **Salida**: Veredicto (Aprobado/Aprobado con Cambios/Rechazado), Hallazgos, Seguimientos.
-**Invocacion**: Claude Code: `"usa el agente reviewer"` | Codex: `usa el skill de review` | OpenCode: `"usa el agente reviewer"`
+**Invocacion**: Claude Code: `"usa el agente reviewer"` | Codex: `usa el skill de review`
 
 ### Docs Maintainer
 **Proposito**: Mantiene la documentacion sincronizada con la realidad.
 **Politica de commits**: Docs con codigo = mismo commit. Estado puro = `docs:` prefix. Un commit por ADR.
 **Salida**: Archivos Actualizados, Cambios de Estado, Gaps Restantes, Proximo Doc Recomendado.
-**Invocacion**: Claude Code: `"usa el agente docs-maintainer"` | Codex: `usa el skill de documentation` | OpenCode: `"usa el agente docs-maintainer"`
+**Invocacion**: Claude Code: `"usa el agente docs-maintainer"` | Codex: `usa el skill de documentation`
 
 ### Bootstrapper
 **Proposito**: Inicializa documentacion interactivamente despues de la instalacion.
 **Proceso**: Pregunta sobre el proyecto → Genera VISION.md, TECH_STACK.md, CONVENTIONS.md → Opcionalmente llena SCOPE.md, SYSTEM_OVERVIEW.md, REPO_MAP.md → Verifica con el usuario.
-**Invocacion**: Claude Code: `"usa el agente bootstrapper"` | Codex: `usa el skill de bootstrap` | OpenCode: `"usa el agente bootstrapper"`
+**Invocacion**: Claude Code: `"usa el agente bootstrapper"` | Codex: `usa el skill de bootstrap`
 
 ---
 
