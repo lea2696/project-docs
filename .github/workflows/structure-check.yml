@@ -1,0 +1,55 @@
+name: Structure Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check required directories
+        run: |
+          for dir in product architecture context references plans sessions handoffs memory scaffold scripts .claude/agents .claude/rules .agents/skills; do
+            if [ ! -d "$dir" ]; then
+              echo "❌ Missing directory: $dir"
+              exit 1
+            fi
+          done
+          echo "✅ All required directories exist"
+
+      - name: Check scaffold file count
+        run: |
+          count=$(find scaffold/ -type f | wc -l)
+          if [ "$count" -ne 18 ]; then
+            echo "❌ Scaffold has $count files (expected 18)"
+            find scaffold/ -type f | sort
+            exit 1
+          fi
+          echo "✅ Scaffold has 18 files"
+
+      - name: Check dogfood agent files
+        run: |
+          agents=$(ls .claude/agents/*.md 2>/dev/null | wc -l)
+          rules=$(ls .claude/rules/*.md 2>/dev/null | wc -l)
+          skills=$(find .agents/skills -name "SKILL.md" 2>/dev/null | wc -l)
+          echo "Agents: $agents, Rules: $rules, Skills: $skills"
+          if [ "$agents" -ne 6 ] || [ "$rules" -ne 4 ] || [ "$skills" -ne 5 ]; then
+            echo "❌ Expected 6 agents, 4 rules, 5 skills"
+            exit 1
+          fi
+          echo "✅ All dogfood agent files present"
+
+      - name: Check root agent files
+        run: |
+          for file in CLAUDE.md AGENTS.md; do
+            if [ ! -f "$file" ]; then
+              echo "❌ Missing: $file"
+              exit 1
+            fi
+          done
+          echo "✅ CLAUDE.md and AGENTS.md present"

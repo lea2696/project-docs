@@ -1,0 +1,58 @@
+name: Scaffold Smoke Test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scaffold/**'
+      - 'scripts/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scaffold/**'
+      - 'scripts/**'
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Bootstrap in temp directory (dry run)
+        run: |
+          mkdir -p /tmp/test-repo
+          cd /tmp/test-repo
+          git init -q
+          echo '{"name": "test-project"}' > package.json
+          node $GITHUB_WORKSPACE/scripts/bootstrap.mjs --dry-run --non-interactive
+
+      - name: Bootstrap in temp directory (real)
+        run: |
+          mkdir -p /tmp/test-repo-real
+          cd /tmp/test-repo-real
+          git init -q
+          echo '{"name": "test-project"}' > package.json
+          node $GITHUB_WORKSPACE/scripts/bootstrap.mjs --non-interactive
+
+      - name: Verify no leftover template variables
+        run: |
+          if grep -r '{{' /tmp/test-repo-real/ --include='*.md' 2>/dev/null; then
+            echo "❌ Found leftover template variables"
+            exit 1
+          fi
+          echo "✅ No leftover template variables"
+
+      - name: Verify all files created
+        run: |
+          cd /tmp/test-repo-real
+          for file in CLAUDE.md AGENTS.md .claude/agents/planner.md .claude/rules/general.md .agents/skills/planning/SKILL.md; do
+            if [ ! -f "$file" ]; then
+              echo "❌ Missing: $file"
+              exit 1
+            fi
+          done
+          echo "✅ All expected files created"
