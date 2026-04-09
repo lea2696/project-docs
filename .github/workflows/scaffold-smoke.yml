@@ -1,15 +1,17 @@
-name: Scaffold Smoke Test
+name: Install Smoke Test
 
 on:
   push:
-    branches: [main]
+    branches: [main, v2]
     paths:
-      - 'scaffold/**'
+      - 'dist/**'
+      - 'install.sh'
       - 'scripts/**'
   pull_request:
-    branches: [main]
+    branches: [main, v2]
     paths:
-      - 'scaffold/**'
+      - 'dist/**'
+      - 'install.sh'
       - 'scripts/**'
 
 jobs:
@@ -22,37 +24,47 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Bootstrap in temp directory (dry run)
+      - name: Simulate install in temp directory
         run: |
           mkdir -p /tmp/test-repo
           cd /tmp/test-repo
           git init -q
           echo '{"name": "test-project"}' > package.json
-          node $GITHUB_WORKSPACE/scripts/bootstrap.mjs --dry-run --non-interactive
 
-      - name: Bootstrap in temp directory (real)
-        run: |
-          mkdir -p /tmp/test-repo-real
-          cd /tmp/test-repo-real
-          git init -q
-          echo '{"name": "test-project"}' > package.json
-          node $GITHUB_WORKSPACE/scripts/bootstrap.mjs --non-interactive
+          # Copy dist/ contents (simulating what install.sh does)
+          cp -r $GITHUB_WORKSPACE/dist/* .
+          cp -r $GITHUB_WORKSPACE/dist/.claude .claude
+          cp -r $GITHUB_WORKSPACE/dist/.agents .agents
+
+          # Run init
+          node scripts/docs/init.mjs --name "test-project" --non-interactive
 
       - name: Verify no leftover template variables
         run: |
-          if grep -r '{{' /tmp/test-repo-real/ --include='*.md' 2>/dev/null; then
+          if grep -r '{{PROJECT_NAME}}' /tmp/test-repo/ --include='*.md' 2>/dev/null; then
             echo "❌ Found leftover template variables"
             exit 1
           fi
           echo "✅ No leftover template variables"
 
-      - name: Verify all files created
+      - name: Verify structure
         run: |
-          cd /tmp/test-repo-real
-          for file in CLAUDE.md AGENTS.md .claude/agents/planner.md .claude/rules/general.md .agents/skills/planning/SKILL.md; do
+          cd /tmp/test-repo
+          for file in CLAUDE.md AGENTS.md .claude/agents/planner.md .claude/rules/general.md .agents/skills/planning/SKILL.md .claude/settings.json scripts/docs/validate-docs.mjs scripts/docs/init.mjs; do
             if [ ! -f "$file" ]; then
               echo "❌ Missing: $file"
               exit 1
             fi
           done
           echo "✅ All expected files created"
+
+      - name: Verify validator works
+        run: |
+          cd /tmp/test-repo
+          node scripts/docs/validate-docs.mjs
+          echo "✅ Validator passes"
+
+      - name: Verify CLAUDE.md has project name
+        run: |
+          head -1 /tmp/test-repo/CLAUDE.md | grep -q "test-project"
+          echo "✅ Project name replaced correctly"

@@ -1,6 +1,6 @@
-# project-docs
+# {{PROJECT_NAME}}
 
-Agent-ready documentation framework for AI coding agents (Claude Code, Codex).
+> Agent-ready project powered by [project-docs](https://github.com/lea2696/project-docs).
 
 ## Context Loading
 
@@ -9,7 +9,7 @@ Always read before every task:
 - `context/TECH_STACK.md`
 - `context/CONVENTIONS.md`
 
-Read when relevant:
+Read when relevant to the task:
 - `product/SCOPE.md` — when scope questions arise
 - `product/ROADMAP.md` — when prioritizing work
 - `architecture/SYSTEM_OVERVIEW.md` — when touching architecture
@@ -18,41 +18,42 @@ Read when relevant:
 - `references/CRITICAL_FLOWS.md` — when modifying user journeys
 - `references/KEY_FILES.md` — when locating entry points
 - `references/REPO_MAP.md` — when navigating the codebase
-- `scaffold/` — when modifying scaffold templates
 - Active plans in `plans/`
 - Active sessions in `sessions/`
 - Active handoffs in `handoffs/`
 
-Never load by default:
+Never load by default (only on explicit request):
 - Completed plans, historical sessions, `memory/`
 
 ## Agent Delegation
 
+Use subagents from `.claude/agents/` for structured work:
+
 | Agent | When to use |
 |-------|-------------|
-| planner | Designing new phases, features, or structural changes |
-| implementer | Writing scaffold templates, docs, scripts |
-| tester | Validating scaffold output, structure checks |
-| reviewer | Reviewing changes to scaffold or core docs |
-| docs-maintainer | Keeping README, REPO_MAP, and internal docs current |
-| bootstrapper | Validating scaffold templates and testing bootstrap flow |
+| planner | Converting goals into implementation plans |
+| implementer | Making scoped code changes based on a plan |
+| tester | Defining validation strategy for changes |
+| reviewer | Reviewing completed work for correctness |
+| docs-maintainer | Updating documentation after changes |
+| bootstrapper | Initial project documentation setup |
 
 ## Task Routing
 
 | Path | Agents | When |
 |------|--------|------|
-| **Fast** | implementer only | Typo fixes, formatting, minor doc edits |
-| **Standard** | planner → implementer → tester → reviewer | New scaffold templates, doc improvements, script changes |
-| **Full** | all + human checkpoints | Structural changes, new agent roles, bootstrap flow changes |
+| **Fast** | implementer only | Typo fixes, formatting, config with no behavior impact |
+| **Standard** | planner → implementer → tester → reviewer | Features, bug fixes, refactors, behavior changes |
+| **Full** | all + human checkpoints | Architecture, security, auth, billing, migrations, destructive ops |
 
 When in doubt, use the standard path.
 
 ## Conflict Resolution
 
-- Plan deviation → document and pause for human review
-- 2x rejection on same task → escalate to human
-- Ambiguity → pause and ask human
-- Architecture disagreements → always escalate to human
+- **Plan deviation**: Document in the plan's Deviations section and pause for human review
+- **Repeated rejection**: If reviewer rejects 2x on same task, escalate to human
+- **Ambiguity**: Pause and request human intervention
+- **Architecture disagreements**: Always escalate to human
 
 ## Documentation Enforcement
 

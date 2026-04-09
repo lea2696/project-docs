@@ -25,6 +25,7 @@ A satellite documentation system designed to live inside any software project. I
 - [Templates](#templates)
 - [Memory System](#memory-system)
 - [Conventions](#conventions)
+- [Documentation Enforcement](#documentation-enforcement)
 - [License](#license)
 - [Espanol](#espanol)
 
@@ -402,6 +403,31 @@ Key conventions enforced by this system (details in `context/CONVENTIONS.md`):
 
 ---
 
+## Documentation Enforcement
+
+The framework includes automated enforcement to prevent agents from skipping documentation updates.
+
+### Three Layers
+
+| Layer | Mechanism | When it fires |
+|-------|-----------|---------------|
+| **Validator** | `node scripts/validate-docs.mjs --strict` | On demand or via hooks |
+| **Pre-commit hook** | Claude Code `settings.json` hook matching `git commit` | Every commit by the agent |
+| **CI** | GitHub Actions `docs-lint.yml` | Every push/PR to main |
+
+### What `--strict` Checks
+
+- **Placeholder detection**: Required content files (VISION.md, CURRENT_STATE.md, TECH_STACK.md, CONVENTIONS.md, KNOWN_ISSUES.md) must not contain template placeholder content
+- **Date validation**: Frontmatter `last_updated` must be a valid ISO date, not `YYYY-MM-DD` placeholder
+- **Session activity**: If 5+ commits exist with no session notes, the validator blocks
+- **Init grace period**: Repos with fewer than 3 commits skip content checks (allows initial bootstrap)
+
+### How Blocking Works
+
+The pre-commit hook uses Claude Code's `PreToolUse` event to intercept `git commit` commands. If `--strict` validation fails (exit code 2), the commit is rejected and the agent sees the error output. The agent must fix the documentation issues before retrying.
+
+---
+
 ## License
 
 MIT
@@ -634,6 +660,31 @@ Los 6 roles son identicos en ambos frameworks.
 **Errores Recurrentes** (`memory/RECURRING_MISTAKES.md`): Entradas con Date, Category, What happened, Root cause, Resolution, Prevention rule, References.
 
 **Changelog** (`memory/CHANGELOG_NOTES.md`): Tabla con Date, Change, Affected Areas, Reason, Agent Impact.
+
+---
+
+## Enforcement de Documentacion
+
+El framework incluye enforcement automatizado para prevenir que los agentes se salten actualizaciones de documentacion.
+
+### Tres Capas
+
+| Capa | Mecanismo | Cuando se ejecuta |
+|------|-----------|-------------------|
+| **Validador** | `node scripts/validate-docs.mjs --strict` | On demand o via hooks |
+| **Hook pre-commit** | Hook de Claude Code `settings.json` que intercepta `git commit` | Cada commit del agente |
+| **CI** | GitHub Actions `docs-lint.yml` | Cada push/PR a main |
+
+### Que Valida `--strict`
+
+- **Deteccion de placeholders**: Los archivos requeridos (VISION.md, CURRENT_STATE.md, TECH_STACK.md, CONVENTIONS.md, KNOWN_ISSUES.md) no deben contener contenido placeholder de template
+- **Validacion de fechas**: El `last_updated` del frontmatter debe ser una fecha ISO valida, no el placeholder `YYYY-MM-DD`
+- **Actividad de sesiones**: Si existen 5+ commits sin session notes, el validador bloquea
+- **Periodo de gracia inicial**: Repos con menos de 3 commits omiten checks de contenido (permite bootstrap inicial)
+
+### Como Funciona el Bloqueo
+
+El hook pre-commit usa el evento `PreToolUse` de Claude Code para interceptar comandos `git commit`. Si la validacion `--strict` falla (exit code 2), el commit se rechaza y el agente ve el output de error. El agente debe arreglar los problemas de documentacion antes de reintentar.
 
 ---
 

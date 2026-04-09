@@ -2,9 +2,9 @@ name: Structure Check
 
 on:
   push:
-    branches: [main]
+    branches: [main, v2]
   pull_request:
-    branches: [main]
+    branches: [main, v2]
 
 jobs:
   check:
@@ -14,7 +14,7 @@ jobs:
 
       - name: Check required directories
         run: |
-          for dir in product architecture context references plans sessions handoffs memory scaffold scripts .claude/agents .claude/rules .agents/skills; do
+          for dir in product architecture context references plans sessions handoffs memory scripts .claude/agents .claude/rules .agents/skills dist; do
             if [ ! -d "$dir" ]; then
               echo "❌ Missing directory: $dir"
               exit 1
@@ -22,34 +22,52 @@ jobs:
           done
           echo "✅ All required directories exist"
 
-      - name: Check scaffold file count
+      - name: Check dist completeness
         run: |
-          count=$(find scaffold/ -type f | wc -l)
-          if [ "$count" -ne 18 ]; then
-            echo "❌ Scaffold has $count files (expected 18)"
-            find scaffold/ -type f | sort
+          # Verify dist/ has all required subdirectories
+          for dir in product architecture context references plans sessions handoffs memory scripts/docs .claude/agents .claude/rules .agents/skills; do
+            if [ ! -d "dist/$dir" ]; then
+              echo "❌ Missing dist directory: dist/$dir"
+              exit 1
+            fi
+          done
+          echo "✅ All dist directories present"
+
+          # Count dist files (minimum check)
+          count=$(find dist/ -type f | wc -l)
+          if [ "$count" -lt 35 ]; then
+            echo "❌ dist/ has $count files (expected at least 35)"
+            find dist/ -type f | sort
             exit 1
           fi
-          echo "✅ Scaffold has 18 files"
+          echo "✅ dist/ has $count files (minimum 35)"
 
-      - name: Check dogfood agent files
+      - name: Check dist has no leftover template path vars
         run: |
-          agents=$(ls .claude/agents/*.md 2>/dev/null | wc -l)
-          rules=$(ls .claude/rules/*.md 2>/dev/null | wc -l)
-          skills=$(find .agents/skills -name "SKILL.md" 2>/dev/null | wc -l)
+          if grep -r '{{PROJECT_DOCS_PATH}}' dist/ 2>/dev/null; then
+            echo "❌ Found leftover {{PROJECT_DOCS_PATH}} in dist/"
+            exit 1
+          fi
+          echo "✅ No {{PROJECT_DOCS_PATH}} in dist/"
+
+      - name: Check dist agent files
+        run: |
+          agents=$(ls dist/.claude/agents/*.md 2>/dev/null | wc -l)
+          rules=$(ls dist/.claude/rules/*.md 2>/dev/null | wc -l)
+          skills=$(find dist/.agents/skills -name "SKILL.md" 2>/dev/null | wc -l)
           echo "Agents: $agents, Rules: $rules, Skills: $skills"
-          if [ "$agents" -ne 6 ] || [ "$rules" -ne 4 ] || [ "$skills" -ne 5 ]; then
-            echo "❌ Expected 6 agents, 4 rules, 5 skills"
+          if [ "$agents" -ne 6 ] || [ "$rules" -ne 4 ] || [ "$skills" -ne 6 ]; then
+            echo "❌ Expected 6 agents, 4 rules, 6 skills in dist/"
             exit 1
           fi
-          echo "✅ All dogfood agent files present"
+          echo "✅ All dist agent files present"
 
-      - name: Check root agent files
+      - name: Check root files
         run: |
-          for file in CLAUDE.md AGENTS.md; do
+          for file in CLAUDE.md AGENTS.md install.sh dist/CLAUDE.md dist/AGENTS.md dist/.claude/settings.json; do
             if [ ! -f "$file" ]; then
               echo "❌ Missing: $file"
               exit 1
             fi
           done
-          echo "✅ CLAUDE.md and AGENTS.md present"
+          echo "✅ All root files present"

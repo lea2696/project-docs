@@ -28,8 +28,8 @@ Do NOT use `--no-verify` or any other mechanism to bypass this hook.
 ## End-of-Session Protocol
 
 Before ending any work session:
-1. Create a session note using `{{PROJECT_DOCS_PATH}}/sessions/SESSION_TEMPLATE.md`
+1. Create a session note using `sessions/SESSION_TEMPLATE.md`
 2. List all documentation files read during the session
 3. Complete the compliance checklist
-4. If work is incomplete, create a handoff note using `{{PROJECT_DOCS_PATH}}/handoffs/HANDOFF_TEMPLATE.md`
-5. Update `{{PROJECT_DOCS_PATH}}/context/CURRENT_STATE.md` if project state changed
+4. If work is incomplete, create a handoff note using `handoffs/HANDOFF_TEMPLATE.md`
+5. Update `context/CURRENT_STATE.md` if project state changed

@@ -3,10 +3,10 @@
 /**
  * project-docs validator
  *
- * Validates documentation structure, frontmatter, and internal links.
+ * Validates documentation structure, frontmatter, and content quality.
  *
  * Usage:
- *   node scripts/validate-docs.mjs [options] [project-docs-path]
+ *   node scripts/docs/validate-docs.mjs [options] [docs-root-path]
  *
  * Options:
  *   --strict    Enable content validation, date checks, and session activity checks
@@ -19,7 +19,8 @@ import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
-const DEFAULT_DOCS_DIR = resolve(SCRIPT_DIR, '..');
+// scripts/docs/ → repo root (2 levels up)
+const DEFAULT_DOCS_DIR = resolve(SCRIPT_DIR, '..', '..');
 
 const REQUIRED_DIRS = [
   'product', 'architecture', 'context', 'references',
@@ -65,6 +66,9 @@ const REQUIRED_CONTENT_FILES = [
   'context/TECH_STACK.md',
   'context/CONVENTIONS.md',
 ];
+
+// Directories to skip when scanning for .md files
+const SKIP_DIRS = new Set(['.', '..', '.git', '.claude', '.agents', 'node_modules', 'scripts', 'dist', 'src', 'lib', 'build', 'vendor']);
 
 // --- Helpers ---
 
@@ -140,7 +144,7 @@ async function getAllMdFiles(dir, base = dir) {
   const entries = await readdir(dir, { withFileTypes: true });
   const files = [];
   for (const entry of entries) {
-    if (entry.name.startsWith('.') || entry.name === 'scaffold' || entry.name === 'scripts' || entry.name === 'node_modules') continue;
+    if (entry.name.startsWith('.') || SKIP_DIRS.has(entry.name)) continue;
     const fullPath = join(dir, entry.name);
     if (entry.isDirectory()) {
       files.push(...await getAllMdFiles(fullPath, base));
@@ -202,29 +206,12 @@ async function main() {
 
   }
 
-  // 4. Check scaffold completeness (minimum count)
-  const scaffoldDir = join(docsDir, 'scaffold');
-  if (existsSync(scaffoldDir)) {
-    let scaffoldCount = 0;
-    async function countFiles(dir) {
-      const entries = await readdir(dir, { withFileTypes: true });
-      for (const entry of entries) {
-        if (entry.isDirectory()) await countFiles(join(dir, entry.name));
-        else scaffoldCount++;
-      }
-    }
-    await countFiles(scaffoldDir);
-    if (scaffoldCount < 18) {
-      warnings.push(`Scaffold has ${scaffoldCount} files (expected at least 18)`);
-    }
-  }
-
   // --- Strict-only checks ---
   if (strict) {
     const totalCommits = getGitCommitCount();
     const inGracePeriod = totalCommits !== null && totalCommits < 3;
 
-    // 4b. Frontmatter date validation (skip during grace period)
+    // 3b. Frontmatter date validation (skip during grace period)
     if (!inGracePeriod) {
       for (const { path: filePath, rel } of mdFiles) {
         const content = await readFile(filePath, 'utf-8');
@@ -243,11 +230,11 @@ async function main() {
       }
     }
 
-    // 5. Placeholder detection on required content files
+    // 4. Placeholder detection on required content files
     if (!inGracePeriod) {
       for (const file of REQUIRED_CONTENT_FILES) {
         const filePath = join(docsDir, file);
-        if (!existsSync(filePath)) continue; // already reported as missing file
+        if (!existsSync(filePath)) continue;
         const content = await readFile(filePath, 'utf-8');
         const matches = PLACEHOLDER_PATTERNS.filter(p => p.test(content));
         if (matches.length >= 2) {
@@ -256,7 +243,7 @@ async function main() {
       }
     }
 
-    // 6. Session activity check
+    // 5. Session activity check
     if (!inGracePeriod && totalCommits !== null) {
       const sessionFiles = await getSessionFiles(docsDir);
 
@@ -278,7 +265,7 @@ async function main() {
     }
   }
 
-  // 7. Report
+  // 6. Report
   console.log(`  Files checked: ${mdFiles.length}`);
   console.log(`  Errors: ${errors.length}`);
   console.log(`  Warnings: ${warnings.length}`);
