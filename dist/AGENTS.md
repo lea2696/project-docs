@@ -1,0 +1,42 @@
+# {{PROJECT_NAME}} — Agent Routing
+
+> Agent policy for [project-docs](https://github.com/lea2696/project-docs) framework.
+
+## Available Skills
+
+| Skill | Directory | Purpose |
+|-------|-----------|---------|
+| bootstrap | `.agents/skills/bootstrap/` | Initialize project documentation |
+| planning | `.agents/skills/planning/` | Convert goals into implementation plans |
+| implementation | `.agents/skills/implementation/` | Execute scoped code changes |
+| testing | `.agents/skills/testing/` | Define validation strategy |
+| review | `.agents/skills/review/` | Review work for correctness and fit |
+| documentation | `.agents/skills/documentation/` | Keep docs synchronized with reality |
+
+## Task Routing
+
+| Path | Skills | When |
+|------|--------|------|
+| Fast | implementation only | Typos, formatting, config with no behavior impact |
+| Standard | planning → implementation → testing → review | Features, bug fixes, refactors, behavior changes |
+| Full | all + human checkpoints | Architecture, security, migrations, destructive ops |
+
+When in doubt, use the standard path.
+
+## Context Policy
+
+**Always read** before every task:
+- `product/VISION.md`
+- `context/TECH_STACK.md`
+- `context/CONVENTIONS.md`
+
+**Read when relevant**: SCOPE, ROADMAP, SYSTEM_OVERVIEW, CURRENT_STATE, KNOWN_ISSUES, CRITICAL_FLOWS, KEY_FILES, REPO_MAP, active plans/sessions/handoffs.
+
+**Never load by default**: completed plans, historical sessions, memory files.
+
+## Conflict Resolution
+
+- Plan deviation → document and pause for human review
+- 2x rejection on same task → escalate to human
+- Ambiguity → pause and ask human
+- Architecture disagreements → always escalate to human

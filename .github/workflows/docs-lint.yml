@@ -2,9 +2,9 @@ name: Docs Lint
 
 on:
   push:
-    branches: [main]
+    branches: [main, v2]
   pull_request:
-    branches: [main]
+    branches: [main, v2]
 
 jobs:
   validate:
@@ -17,4 +17,4 @@ jobs:
           node-version: '20'
 
       - name: Validate documentation structure and frontmatter
-        run: node scripts/validate-docs.mjs
+        run: node scripts/validate-docs.mjs --strict
